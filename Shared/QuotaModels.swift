@@ -26,8 +26,11 @@ struct QuotaSnapshot: Codable {
             return weekday == 1 ? 7 : weekday - 1
         }
         let startAt = weeklyResetAt - weeklyDurationMins * 60
-        let elapsed = max(0, Date().timeIntervalSince1970 - startAt)
-        return min(7, max(1, Int(elapsed / 86_400) + 1))
+        let calendar = Calendar.current
+        let startDay = calendar.startOfDay(for: Date(timeIntervalSince1970: startAt))
+        let today = calendar.startOfDay(for: Date())
+        let days = calendar.dateComponents([.day], from: startDay, to: today).day ?? 0
+        return min(7, max(1, days + 1))
     }
 
     var todayUsed: Double {
@@ -36,7 +39,8 @@ struct QuotaSnapshot: Codable {
     }
 
     var todayRemaining: Double {
-        max(0, quotaDailyBudget - todayUsed)
+        let targetThroughToday = Double(dayIndex) * quotaDailyBudget
+        return max(0, min(weeklyRemaining, targetThroughToday - weeklyUsed))
     }
 
     static let placeholder = QuotaSnapshot(
