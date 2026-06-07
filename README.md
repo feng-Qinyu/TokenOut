@@ -1,79 +1,87 @@
-# TokenOut
+# 清零 TokenOut
 
-TokenOut is a macOS WidgetKit app for watching Codex token quota at a glance.
+**清零（TokenOut）** 是一个 macOS 桌面小组件，用来提醒自己把每天的 Codex Token 额度用完。
 
-It shows four quota rings:
+它会在桌面上显示几个额度圈，让你一眼看到今天还需要继续使用多少额度。
 
-- Weekly remaining quota
-- 5-hour remaining quota
-- Today used quota
-- Today unused target quota
+<p align="center">
+  <img src="docs/logo.png" width="140" alt="TokenOut logo">
+</p>
 
-The app includes both a normal macOS client window and a native WidgetKit widget that can be dragged onto the desktop from the macOS widget picker.
+## 截图
 
-## What It Does
+<p align="center">
+  <img src="docs/widget.png" width="720" alt="TokenOut macOS widget screenshot">
+</p>
 
-TokenOut reads Codex quota data through the local Codex app server and writes a small snapshot file for the widget to display.
+## 主要功能
 
-Current UI:
+- 显示本周剩余额度
+- 显示 5 小时剩余额度
+- 显示今日已用额度
+- 显示今日未用额度
+- 低于 20% 时使用红色提示
+- 后台每 1 分钟自动更新
+- 支持作为 macOS 原生 WidgetKit 小组件拖到桌面
 
-- Green ring: healthy remaining quota
-- Red ring: remaining quota below 20%
-- Client window: includes metric names, percentages, descriptions, update time, and refresh frequency
-- Desktop widget: compact ring view for always-on monitoring
+## 为什么叫清零
 
-## Data Source
+这个组件的目的很简单：提醒自己不要浪费每天可用的 Codex Token。
 
-The background fetch script calls:
+每天看到桌面上的数字，就知道今天还有多少额度需要继续使用，尽量把当天目标清零。
+
+## 数据来源
+
+TokenOut 通过本机 Codex App Server 读取额度数据，请求方法是：
 
 ```text
 account/rateLimits/read
 ```
 
-from the local Codex app server.
-
-The snapshot is written to:
+后台脚本会把读取到的数据写入：
 
 ```text
 /Applications/TokenOut.app/Contents/Resources/snapshot.json
 ```
 
-The widget reads that snapshot directly.
+桌面小组件读取这个快照文件并展示。
 
-## Refresh Behavior
+## 指标口径
 
-TokenOut installs a LaunchAgent:
+- 本周剩余：`100 - weekly usedPercent`
+- 5 小时剩余：`100 - primary usedPercent`
+- 今日已用：当前版本按固定展示值 `12%`
+- 今日未用：根据本周重置时间、当前第几天、本周剩余额度和每日目标预算估算
+
+说明：当前 Codex 额度接口没有直接返回“本地当天 0 点以来已用多少”的字段，所以今日相关指标是估算口径。
+
+## 后台刷新
+
+TokenOut 使用 LaunchAgent 后台更新：
 
 ```text
 local.tokenout.fetch
 ```
 
-It refreshes every 60 seconds.
+刷新频率：
 
-The LaunchAgent plist template is:
+```text
+60 秒
+```
+
+LaunchAgent 模板文件：
 
 ```text
 Scripts/local.tokenout.fetch.plist
 ```
 
-## Current Metric Meaning
-
-- Weekly remaining: `100 - weekly usedPercent`
-- 5-hour remaining: `100 - primary usedPercent`
-- Today used: currently displayed as a fixed 12% value
-- Today unused: estimated from the weekly reset window, current week day, weekly remaining quota, and daily target budget
-
-Codex currently does not expose a direct "used since local midnight" field through this flow, so the daily metric is an estimate.
-
-## Build
-
-Requirements:
+## 构建要求
 
 - macOS 14+
 - Xcode
-- A local Codex app installation
+- 本机已安装 Codex App
 
-Build from the project directory:
+构建命令：
 
 ```bash
 xcodebuild \
@@ -85,15 +93,15 @@ xcodebuild \
   build
 ```
 
-The built app will be:
+构建产物：
 
 ```text
 /private/tmp/CodexQuotaDerivedData/Build/Products/Debug/TokenOut.app
 ```
 
-## Install Locally
+## 本地安装
 
-Copy the app into `/Applications`:
+复制 App：
 
 ```bash
 rm -rf /Applications/TokenOut.app
@@ -101,7 +109,7 @@ cp -R /private/tmp/CodexQuotaDerivedData/Build/Products/Debug/TokenOut.app /Appl
 xattr -cr /Applications/TokenOut.app
 ```
 
-Install the background fetch script and LaunchAgent:
+安装后台脚本：
 
 ```bash
 mkdir -p "$HOME/Library/Application Support/TokenOut" "$HOME/Library/Logs" "$HOME/Library/LaunchAgents"
@@ -111,7 +119,7 @@ launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/local.tokenout.fetc
 launchctl kickstart -k gui/$(id -u)/local.tokenout.fetch
 ```
 
-Register the widget:
+注册小组件：
 
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
@@ -119,18 +127,24 @@ Register the widget:
 pluginkit -e use -i local.tokenout.app.widget
 ```
 
-Then open the macOS widget picker and search for:
+然后打开 macOS 小组件面板，搜索：
 
 ```text
 TokenOut
 ```
 
-## Notes
+## 当前工程说明
 
-This project is currently a local macOS utility. It is not distributed through the Mac App Store.
+Xcode 工程仍保留早期 scaffold 名称 `CodexQuota.xcodeproj` 和 scheme `CodexQuota`，但最终构建出来的 App 和 Widget 都已经是 TokenOut。
 
-The Xcode target names still use the original project scaffold names, but the built app and widget are named TokenOut:
+当前标识：
 
-- App bundle id: `local.tokenout.app`
-- Widget bundle id: `local.tokenout.app.widget`
-- LaunchAgent id: `local.tokenout.fetch`
+- App 名称：`TokenOut`
+- 中文名：`清零`
+- App bundle id：`local.tokenout.app`
+- Widget bundle id：`local.tokenout.app.widget`
+- LaunchAgent id：`local.tokenout.fetch`
+
+## 状态
+
+这是一个自用型 macOS 工具，当前没有上架 Mac App Store。
