@@ -3,7 +3,6 @@ import Foundation
 let quotaAppGroupID = "group.local.tokenout"
 let quotaSnapshotFileName = "snapshot.json"
 let quotaDailyBudget = 100.0 / 7.0
-let quotaDisplayedTodayUsed = 12.0
 
 struct QuotaSnapshot: Codable {
     var weeklyUsed: Double
@@ -32,12 +31,12 @@ struct QuotaSnapshot: Codable {
     }
 
     var todayUsed: Double {
-        quotaDisplayedTodayUsed
+        let previousDaysTarget = Double(max(0, dayIndex - 1)) * quotaDailyBudget
+        return max(0, min(quotaDailyBudget, weeklyUsed - previousDaysTarget))
     }
 
     var todayRemaining: Double {
-        let targetThroughToday = Double(dayIndex) * quotaDailyBudget
-        return max(0, min(weeklyRemaining, targetThroughToday - weeklyUsed))
+        max(0, quotaDailyBudget - todayUsed)
     }
 
     static let placeholder = QuotaSnapshot(
