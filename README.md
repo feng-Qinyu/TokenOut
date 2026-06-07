@@ -133,11 +133,7 @@ pluginkit -e use -i local.tokenout.app.widget
 TokenOut
 ```
 
-## 当前工程说明
-
-Xcode 工程仍保留早期 scaffold 名称 `CodexQuota.xcodeproj` 和 scheme `CodexQuota`，但最终构建出来的 App 和 Widget 都已经是 TokenOut。
-
-当前标识：
+## 项目标识
 
 - App 名称：`TokenOut`
 - 中文名：`清零`
