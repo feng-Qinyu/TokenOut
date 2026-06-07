@@ -1,0 +1,18 @@
+DerivedData/
+build/
+*.xcactivitylog
+*.xcuserstate
+*.DS_Store
+
+# Xcode user-local metadata
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Local runtime data
+snapshot.json
+*.log
+
+# macOS app build outputs
+*.app
+*.appex
+*.dSYM

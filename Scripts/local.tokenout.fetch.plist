@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+ "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>local.tokenout.fetch</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Applications/Codex.app/Contents/Resources/node</string>
+    <string>/Users/jasonfeng/Library/Application Support/TokenOut/fetch-quota.js</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartInterval</key>
+  <integer>60</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/jasonfeng/Library/Logs/TokenOut.fetch.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jasonfeng/Library/Logs/TokenOut.fetch.err.log</string>
+</dict>
+</plist>
