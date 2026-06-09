@@ -44,16 +44,22 @@ account/rateLimits/read
 /Applications/TokenOut.app/Contents/Resources/snapshot.json
 ```
 
+当天起点会单独保存到：
+
+```text
+~/Library/Application Support/TokenOut/daily-baseline.json
+```
+
 桌面小组件读取这个快照文件并展示。
 
 ## 指标口径
 
 - 本周剩余：`100 - weekly usedPercent`
 - 5 小时剩余：`100 - primary usedPercent`
-- 今日已用：按本地自然日估算，当天 0 点后重新计算
+- 今日已用：记录当天第一次刷新时的本周已用值，之后用当前本周已用减去这个基准估算
 - 今日未用：按当前自然日累计目标减去本周已用额度估算，前几天没用完的目标会计入今天
 
-说明：当前 Codex 额度接口没有直接返回“本地当天 0 点以来已用多少”的字段，所以今日相关指标是估算口径。
+说明：当前 Codex 额度接口没有直接返回“本地当天 0 点以来已用多少”的字段，所以 `今日已用` 从当天第一次刷新后开始记录。
 
 ## 后台刷新
 

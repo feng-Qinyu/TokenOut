@@ -7,6 +7,8 @@ const { spawn, spawnSync } = require("child_process");
 const codexPath = "/Applications/Codex.app/Contents/Resources/codex";
 const outDir = "/Applications/TokenOut.app/Contents/Resources";
 const outFile = path.join(outDir, "snapshot.json");
+const stateDir = path.join(os.homedir(), "Library", "Application Support", "TokenOut");
+const baselineFile = path.join(stateDir, "daily-baseline.json");
 const reloadAppPath = "/Applications/TokenOut.app/Contents/MacOS/TokenOut";
 
 function number(value) {
@@ -39,6 +41,78 @@ function parseSnapshot(text) {
     };
   }
   throw new Error("Codex CLI returned no rate limit snapshot");
+}
+
+function localDayKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function readPreviousSnapshot() {
+  try {
+    return JSON.parse(fs.readFileSync(outFile, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function readBaselineState() {
+  try {
+    return JSON.parse(fs.readFileSync(baselineFile, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function snapshotDayKey(snapshot) {
+  if (!snapshot?.fetchedAt) return undefined;
+  const date = new Date(snapshot.fetchedAt);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return localDayKey(date);
+}
+
+function baselineFrom(source, dayKey) {
+  if (source?.dayKey === dayKey && typeof source.todayStartWeeklyUsed === "number") {
+    return source.todayStartWeeklyUsed;
+  }
+  return undefined;
+}
+
+function attachDailyBaseline(snapshot, previous, baselineState) {
+  const dayKey = localDayKey();
+  const previousBaseline =
+    baselineFrom(baselineState, dayKey) ??
+    baselineFrom(previous, dayKey) ??
+    (snapshotDayKey(previous) === dayKey && typeof previous?.weeklyUsed === "number"
+      ? previous.weeklyUsed
+      : undefined);
+
+  snapshot.dayKey = dayKey;
+  snapshot.todayStartWeeklyUsed = previousBaseline ?? snapshot.weeklyUsed;
+
+  if (snapshot.weeklyUsed < snapshot.todayStartWeeklyUsed) {
+    snapshot.todayStartWeeklyUsed = snapshot.weeklyUsed;
+  }
+
+  return snapshot;
+}
+
+function saveBaselineState(snapshot) {
+  fs.mkdirSync(stateDir, { recursive: true });
+  fs.writeFileSync(
+    baselineFile,
+    JSON.stringify(
+      {
+        dayKey: snapshot.dayKey,
+        todayStartWeeklyUsed: snapshot.todayStartWeeklyUsed,
+        updatedAt: snapshot.fetchedAt,
+      },
+      null,
+      2
+    )
+  );
 }
 
 async function main() {
@@ -106,10 +180,13 @@ async function main() {
     });
   });
 
+  attachDailyBaseline(snapshot, readPreviousSnapshot(), readBaselineState());
+
   fs.mkdirSync(outDir, { recursive: true });
   const tmpFile = `${outFile}.tmp`;
   fs.writeFileSync(tmpFile, JSON.stringify(snapshot, null, 2));
   fs.renameSync(tmpFile, outFile);
+  saveBaselineState(snapshot);
 
   if (fs.existsSync(reloadAppPath)) {
     spawnSync(reloadAppPath, ["--reload-widget"], { stdio: "ignore", timeout: 5000 });

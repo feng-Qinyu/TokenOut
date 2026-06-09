@@ -11,6 +11,8 @@ struct QuotaSnapshot: Codable {
     var weeklyDurationMins: Double?
     var planType: String?
     var fetchedAt: Date
+    var dayKey: String?
+    var todayStartWeeklyUsed: Double?
 
     var weeklyRemaining: Double {
         max(0, 100 - weeklyUsed)
@@ -34,8 +36,7 @@ struct QuotaSnapshot: Codable {
     }
 
     var todayUsed: Double {
-        let previousDaysTarget = Double(max(0, dayIndex - 1)) * quotaDailyBudget
-        return max(0, min(quotaDailyBudget, weeklyUsed - previousDaysTarget))
+        max(0, weeklyUsed - effectiveTodayStartWeeklyUsed)
     }
 
     var todayRemaining: Double {
@@ -49,8 +50,41 @@ struct QuotaSnapshot: Codable {
         weeklyResetAt: nil,
         weeklyDurationMins: nil,
         planType: "codex",
-        fetchedAt: Date()
+        fetchedAt: Date(),
+        dayKey: nil,
+        todayStartWeeklyUsed: nil
     )
+
+    func withDailyBaseline(previous: QuotaSnapshot?) -> QuotaSnapshot {
+        var snapshot = self
+        let currentDayKey = Self.localDayKey()
+
+        if previous?.dayKey == currentDayKey,
+           let baseline = previous?.todayStartWeeklyUsed {
+            snapshot.todayStartWeeklyUsed = weeklyUsed < baseline ? weeklyUsed : baseline
+        } else if previous.map({ Self.localDayKey(for: $0.fetchedAt) }) == currentDayKey {
+            snapshot.todayStartWeeklyUsed = previous?.weeklyUsed ?? weeklyUsed
+        } else {
+            snapshot.todayStartWeeklyUsed = weeklyUsed
+        }
+        snapshot.dayKey = currentDayKey
+        return snapshot
+    }
+
+    private var effectiveTodayStartWeeklyUsed: Double {
+        if dayKey == Self.localDayKey(), let todayStartWeeklyUsed {
+            return min(todayStartWeeklyUsed, weeklyUsed)
+        }
+
+        let previousDaysTarget = Double(max(0, dayIndex - 1)) * quotaDailyBudget
+        return previousDaysTarget
+    }
+
+    private static func localDayKey(for date: Date = Date()) -> String {
+        let calendar = Calendar.current
+        let parts = calendar.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
 }
 
 enum QuotaStore {
@@ -86,6 +120,7 @@ enum QuotaStore {
     static func save(_ snapshot: QuotaSnapshot) {
         guard let fileURL else { return }
         do {
+            let snapshot = snapshot.withDailyBaseline(previous: load())
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(snapshot)
