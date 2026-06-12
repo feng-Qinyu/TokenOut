@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		100000000000000000000101 /* CodexQuotaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000201 /* CodexQuotaApp.swift */; };
-		100000000000000000000102 /* QuotaFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000202 /* QuotaFetcher.swift */; };
 		100000000000000000000103 /* QuotaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000203 /* QuotaModels.swift */; };
 		100000000000000000000104 /* QuotaRingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000204 /* QuotaRingsView.swift */; };
 		100000000000000000000105 /* CodexQuotaWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 100000000000000000000205 /* CodexQuotaWidgets.swift */; };
@@ -44,7 +43,6 @@
 
 /* Begin PBXFileReference section */
 		100000000000000000000201 /* CodexQuotaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexQuotaApp.swift; sourceTree = "<group>"; };
-		100000000000000000000202 /* QuotaFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaFetcher.swift; sourceTree = "<group>"; };
 		100000000000000000000203 /* QuotaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaModels.swift; sourceTree = "<group>"; };
 		100000000000000000000204 /* QuotaRingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotaRingsView.swift; sourceTree = "<group>"; };
 		100000000000000000000205 /* CodexQuotaWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexQuotaWidgets.swift; sourceTree = "<group>"; };
@@ -89,7 +87,6 @@
 			isa = PBXGroup;
 			children = (
 				100000000000000000000201 /* CodexQuotaApp.swift */,
-				100000000000000000000202 /* QuotaFetcher.swift */,
 				100000000000000000000210 /* Assets.xcassets */,
 				100000000000000000000206 /* Info.plist */,
 				100000000000000000000208 /* CodexQuota.entitlements */,
@@ -217,7 +214,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000101 /* CodexQuotaApp.swift in Sources */,
-				100000000000000000000102 /* QuotaFetcher.swift in Sources */,
 				100000000000000000000103 /* QuotaModels.swift in Sources */,
 				100000000000000000000104 /* QuotaRingsView.swift in Sources */,
 			);

@@ -1,4 +1,5 @@
 import Darwin
+import Foundation
 import SwiftUI
 import WidgetKit
 
@@ -9,6 +10,7 @@ struct TokenOutApp: App {
     init() {
         if CommandLine.arguments.contains("--reload-widget") {
             WidgetCenter.shared.reloadAllTimelines()
+            Thread.sleep(forTimeInterval: 0.6)
             exit(0)
         }
     }
@@ -19,6 +21,10 @@ struct TokenOutApp: App {
                 .environmentObject(model)
                 .task {
                     await model.refresh()
+                    while !Task.isCancelled {
+                        try? await Task.sleep(nanoseconds: 60_000_000_000)
+                        await model.refresh()
+                    }
                 }
         }
         .defaultSize(width: 620, height: 280)
@@ -125,7 +131,7 @@ struct TokenOutDashboard: View {
                 title: "今日未用",
                 detail: "今天建议继续用掉的额度",
                 value: snapshot.todayRemaining,
-                total: 100,
+                total: quotaDailyBudget,
                 symbol: "gauge.medium",
                 healthValue: snapshot.todayRemaining / max(1, quotaDailyBudget) * 100
             )

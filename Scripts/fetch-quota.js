@@ -12,8 +12,11 @@ const baselineFile = path.join(stateDir, "daily-baseline.json");
 const reloadAppPath = "/Applications/TokenOut.app/Contents/MacOS/TokenOut";
 
 function number(value) {
-  if (typeof value === "number") return value;
-  if (typeof value === "string" && value.trim() !== "") return Number(value);
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
   return undefined;
 }
 
@@ -124,6 +127,7 @@ async function main() {
 
   let stdout = "";
   let stderr = "";
+  child.stdin.on("error", () => {});
   child.stdout.on("data", (data) => {
     stdout += data.toString("utf8");
   });

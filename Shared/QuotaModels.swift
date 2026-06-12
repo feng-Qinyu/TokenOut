@@ -27,7 +27,8 @@ struct QuotaSnapshot: Codable {
             let weekday = Calendar.current.component(.weekday, from: Date())
             return weekday == 1 ? 7 : weekday - 1
         }
-        let startAt = weeklyResetAt - weeklyDurationMins * 60
+        let resetAtSeconds = weeklyResetAt > 1e11 ? weeklyResetAt / 1000 : weeklyResetAt
+        let startAt = resetAtSeconds - weeklyDurationMins * 60
         let calendar = Calendar.current
         let startDay = calendar.startOfDay(for: Date(timeIntervalSince1970: startAt))
         let today = calendar.startOfDay(for: Date())

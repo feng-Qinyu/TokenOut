@@ -8,7 +8,7 @@ struct QuotaRingsView: View {
             MetricRing(title: "本周剩余", value: snapshot.weeklyRemaining, total: 100, symbol: "calendar", healthValue: snapshot.weeklyRemaining)
             MetricRing(title: "5小时剩余", value: snapshot.fiveHourRemaining, total: 100, symbol: "clock", healthValue: snapshot.fiveHourRemaining)
             MetricRing(title: "今日已用", value: snapshot.todayUsed, total: quotaDailyBudget, symbol: "flame", healthValue: snapshot.todayRemaining / max(1, quotaDailyBudget) * 100)
-            MetricRing(title: "今日未用", value: snapshot.todayRemaining, total: 100, symbol: "gauge.medium", healthValue: snapshot.todayRemaining / max(1, quotaDailyBudget) * 100)
+            MetricRing(title: "今日未用", value: snapshot.todayRemaining, total: quotaDailyBudget, symbol: "gauge.medium", healthValue: snapshot.todayRemaining / max(1, quotaDailyBudget) * 100)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)

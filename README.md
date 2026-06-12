@@ -120,7 +120,8 @@ xattr -cr /Applications/TokenOut.app
 ```bash
 mkdir -p "$HOME/Library/Application Support/TokenOut" "$HOME/Library/Logs" "$HOME/Library/LaunchAgents"
 cp Scripts/fetch-quota.js "$HOME/Library/Application Support/TokenOut/fetch-quota.js"
-cp Scripts/local.tokenout.fetch.plist "$HOME/Library/LaunchAgents/local.tokenout.fetch.plist"
+sed "s|__HOME__|$HOME|g" Scripts/local.tokenout.fetch.plist \
+  > "$HOME/Library/LaunchAgents/local.tokenout.fetch.plist"
 launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/local.tokenout.fetch.plist"
 launchctl kickstart -k gui/$(id -u)/local.tokenout.fetch
 ```
